@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1722050492814,
+      "tag": "0000_fantastic_kree",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1722883285732,
+      "tag": "0001_ordinary_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1722883674591,
+      "tag": "0002_fair_deathstrike",
+      "breakpoints": true
+    }
+  ]
+}

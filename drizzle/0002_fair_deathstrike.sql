@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_user_period_changes" ON "user_period_changes" USING btree ("user_id","period","change");

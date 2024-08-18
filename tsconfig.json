@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    // "allowImportingTsExtensions": true,
+    // "noEmit": true,
+
+    // Base
+    // "incremental": true,
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "lib": ["ESNext"],
+
+    // Module
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+
+    // Import options
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+
+    // Strict
+    "strict": true,
+    // "noUncheckedIndexedAccess": true,
+    // "noImplicitAny": false,
+
+    // "sourceMap": true,
+    // "isolatedModules": true,
+
+    // Dirs
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "tsc-alias": {
+    "resolveFullPaths": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

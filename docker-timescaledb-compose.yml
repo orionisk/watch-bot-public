@@ -1,0 +1,13 @@
+services:
+  timescaledb-ha:
+    image: timescale/timescaledb-ha:pg16
+    ports:
+      - 5432:5432
+    volumes:
+      - timescale_data:/home/postgres/pgdata/data'
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+volumes:
+  timescale_data:

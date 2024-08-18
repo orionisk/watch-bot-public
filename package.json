@@ -1,0 +1,54 @@
+{
+  "name": "pump-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "NODE_ENV=production node dist/main.js",
+    "start:dev": "node dist/main.js",
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc && tsc-alias",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/migrate.js",
+    "db:studio": "drizzle-kit studio --port 3001",
+    "db:push": "drizzle-kit push --force",
+    "db:migrate:prod": "NODE_ENV=production node scripts/migrate.js",
+    "db:generate:prod": "NODE_ENV=production drizzle-kit generate",
+    "db:studio:prod": "NODE_ENV=production drizzle-kit studio --port 3000",
+    "db:push:prod": "NODE_ENV=production drizzle-kit push",
+    "db:drop": "drizzle-kit drop",
+    "db:migrate-kit": "drizzle-kit migrate",
+    "db:seed": "tsx seed/seed-dev.ts",
+    "db:seed:prod": "NODE_ENV=production SEED=true tsx seed/seed.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@grammyjs/menu": "^1.2.2",
+    "ccxt": "4.3.76",
+    "cron": "^3.1.7",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.33.0",
+    "drizzle-zod": "^0.5.1",
+    "grammy": "^1.28.0",
+    "pino": "^9.3.2",
+    "postgres": "^3.4.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.2.0",
+    "@typescript-eslint/parser": "^8.0.1",
+    "drizzle-kit": "^0.24.0",
+    "eslint": "^9.9.0",
+    "tsc-alias": "^1.8.10",
+    "tsx": "^4.17.0",
+    "typescript": "^5.5.4"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "ccxt@4.3.76": "patches/ccxt@4.3.76.patch"
+    }
+  }
+}
