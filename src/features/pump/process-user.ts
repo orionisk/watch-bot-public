@@ -9,41 +9,6 @@ import {
 } from '@/types/types';
 
 const cds: Cooldowns = {};
-export const processUser = async (user: UserWithExchanges) => {
-  const { id, userPeriodChanges, isEnabled, userExchanges } = user;
-
-  if (!isEnabled) return;
-
-  for (const periodChange of userPeriodChanges) {
-    const { period: periodSec, change } = periodChange;
-    const period = (periodSec! + 2) * 1000;
-
-    const now = Date.now();
-
-    const timestamp = new Date(now - period);
-
-    let exchanges = userExchanges
-      .filter(exchange => exchange.enabled)
-      .map(exchange => exchange.exchangeName);
-
-    if (!exchanges.length) exchanges = ['Binance', 'Bybit'];
-
-    const data = await executePriceChangeQuery(
-      priceChangeQuery(timestamp.toISOString(), change!, exchanges)
-    );
-
-    if (!data.length) return;
-
-    const filteredData = filterCooldowns(data, id, period + 1000, change!);
-
-    if (!filteredData.length) return;
-
-    sendPriceChangeNotification(user, filteredData);
-
-    if (filteredData.length)
-      addCooldown(id, filteredData, period + 1000, change!);
-  }
-};
 
 export const processUserGroup = async (group: UserGroup) => {
   const { period, change, users } = group;
@@ -57,7 +22,7 @@ export const processUserGroup = async (group: UserGroup) => {
     .filter(exchange => exchange.enabled)
     .map(exchange => exchange.exchangeName);
 
-  if (!exchanges.length) exchanges = ['Binance', 'Bybit'];
+  if (!exchanges.length) exchanges = ['Bybit'];
 
   const data = await executePriceChangeQuery(
     priceChangeQuery(timestamp.toISOString(), change, exchanges)
@@ -86,14 +51,31 @@ const filterCooldowns = (
   period: number,
   change: number
 ): PriceChangeData[] => {
-  return data.filter(({ symbol, data: exchangeData }) => {
-    return Object.keys(exchangeData).some(exchangeName => {
-      const periodChange = `${period}_${change}`;
-      const cooldownEntry =
-        cds[userId]?.[periodChange]?.[symbol]?.[exchangeName];
-      return !cooldownEntry || cooldownEntry.cdEndTimestamp <= Date.now();
-    });
-  });
+  const now = Date.now();
+  const periodChange = `${period}_${change}`;
+
+  return data.reduce(
+    (filteredData: PriceChangeData[], { symbol, data: exchangeData }) => {
+      const filteredExchangeData: { [key: string]: any } = {};
+      let hasValidExchange = false;
+
+      Object.entries(exchangeData).forEach(([exchangeName, exchangeInfo]) => {
+        const cooldownEntry =
+          cds[userId]?.[periodChange]?.[symbol]?.[exchangeName];
+        if (!cooldownEntry || cooldownEntry.cdEndTimestamp <= now) {
+          filteredExchangeData[exchangeName] = exchangeInfo;
+          hasValidExchange = true;
+        }
+      });
+
+      if (hasValidExchange) {
+        filteredData.push({ symbol, data: filteredExchangeData });
+      }
+
+      return filteredData;
+    },
+    []
+  );
 };
 
 const addCooldown = (
@@ -102,6 +84,8 @@ const addCooldown = (
   period: number,
   change: number
 ) => {
+  const now = Date.now();
+
   for (const { symbol, data: exchangeData } of data) {
     if (!cds[userId]) {
       cds[userId] = {};
@@ -114,14 +98,15 @@ const addCooldown = (
     }
 
     for (const exchangeName of Object.keys(exchangeData)) {
-      const cdEndTimestamp =
-        new Date(
-          exchangeData[exchangeName]?.prices[1]?.timestamp + 'Z'
-        ).getTime() + period;
+      const lastPriceTimestamp = new Date(
+        exchangeData[exchangeName]?.lastTime
+      ).getTime();
+      const cdEndTimestamp = Math.max(now, lastPriceTimestamp + period);
 
       if (!cds[userId][periodChange][symbol]) {
         cds[userId][periodChange][symbol] = {};
       }
+
       cds[userId][periodChange][symbol][exchangeName] = {
         cdEndTimestamp
       };

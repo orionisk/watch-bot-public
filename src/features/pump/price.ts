@@ -1,37 +1,7 @@
-import { insertPriceSchema } from '@/db/schema/zod';
-import { e, normalizeSymbol } from '@/common/utils';
-import { addPriceToQueue } from './queue';
 import { logger } from '@/logger/logger';
-import { Ticker } from 'ccxt';
 import { getUsers } from '@/users/users';
-import { ParsePriceData, UserGroup, UserWithExchanges } from '@/types/types';
+import { UserGroup, UserWithExchanges } from '@/types/types';
 import { processUserGroup } from './process-user';
-
-export const insertPrice = async (
-  data: Ticker,
-  exchangeName: string
-): Promise<void> => {
-  const parseResult = parsePrice({
-    exchange: exchangeName,
-    symbol: normalizeSymbol(data.symbol),
-    price: data.last,
-    timestamp: data.datetime
-  });
-
-  if (!parseResult) return;
-
-  await addPriceToQueue(parseResult);
-};
-
-export const parsePrice = (data: ParsePriceData) => {
-  const parseResult = insertPriceSchema.safeParse(data);
-
-  if (!parseResult.success) {
-    logger.error(`Error parsing price data: ${parseResult.error}`);
-  }
-
-  return parseResult.data;
-};
 
 export const checkPriceChange = async (): Promise<UserGroup[]> => {
   try {

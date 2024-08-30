@@ -21,15 +21,11 @@ export type ExchangeConfigurations = Partial<{
 
 export type ExchangeInstance = InstanceType<(typeof ccxt)[ExchangeName]>;
 
-type Price = {
-  price: number;
-  created_at: string;
-  timestamp: string;
-};
-
 type ExchangeData = {
-  prices: Price[];
-  change: number;
+  last: number;
+  lastTime: string;
+  min: number;
+  minTime: string;
   changePercent: number;
 };
 

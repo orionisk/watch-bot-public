@@ -1,0 +1,43 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.beta
+    restart: always
+    command: >
+      sh -c "
+      pnpm run db:migrate && pnpm run start"
+
+  db:
+    image: timescale/timescaledb-ha:pg16
+    env_file:
+      - .env.prod.beta
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "psql -U postgres -d postgres -c 'SELECT 1' || exit 1"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    shm_size: 2g
+    mem_limit: '0'
+    memswap_limit: '0'
+    mem_swappiness: 60
+    mem_reservation: '0'
+    cpus: 0.0
+    cpu_shares: 1024
+    ports:
+      - '30000:5432'
+    volumes:
+      - 'ts-data:/home/postgres/pgdata/data'
+volumes:
+  ts-data:
+    name: ts-data
+    external: false

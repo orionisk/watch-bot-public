@@ -1,6 +1,6 @@
 {
-  "id": "d356e6c3-73fe-4501-a930-b9b0e1386c03",
-  "prevId": "493f5d73-820d-4147-92e0-74bfa15520b2",
+  "id": "3efb63eb-c6f1-4160-bda2-dd036c1d62b6",
+  "prevId": "7724f981-f0db-4c22-bfb0-d864cfc722fe",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -38,12 +38,6 @@
       "name": "pairs_prices",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "exchange": {
           "name": "exchange",
           "type": "text",
@@ -64,7 +58,7 @@
         },
         "timestamp": {
           "name": "timestamp",
-          "type": "timestamp(2)",
+          "type": "timestamp(2) with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -77,11 +71,11 @@
         }
       },
       "indexes": {
-        "idx_pairs_prices_timestamp_symbol_exchange": {
-          "name": "idx_pairs_prices_timestamp_symbol_exchange",
+        "idx_pairs_prices_exchange_symbol_timestamp": {
+          "name": "idx_pairs_prices_exchange_symbol_timestamp",
           "columns": [
             {
-              "expression": "timestamp",
+              "expression": "exchange",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -93,9 +87,9 @@
               "nulls": "last"
             },
             {
-              "expression": "exchange",
+              "expression": "timestamp",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -138,7 +132,35 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "unique_user_period_changes": {
+          "name": "unique_user_period_changes",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "period",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "change",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "user_period_changes_user_id_users_id_fk": {
           "name": "user_period_changes_user_id_users_id_fk",

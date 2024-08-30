@@ -1,26 +1,28 @@
 import { getSymbols } from '@/common/utils';
 import { ExchangeInstance } from '@/types/types';
 import { logger } from '@/logger/logger';
-import { Ticker, Tickers } from 'ccxt';
-import {
-  checkPriceChange,
-  insertPrice,
-  staggeredCheckPriceChange
-} from './price';
-import { deleteOldPrices } from '@/db/queries/deleteOldPrices';
+import { insertPrice } from './insert-price';
 
-const exchangesThrottle: Record<string, number> = {
-  Bybit: 500,
-  OKX: 500
+const separateWatch: Record<string, boolean> = {
+  Binance: true,
+  Bybit: true,
+  OKX: false
+};
+
+const fallbackFetchInterval: Record<string, number> = {
+  Binance: 5000,
+  Bybit: 3000,
+  OKX: 3000
 };
 
 export const watchExchanges = (...exchanges: ExchangeInstance[]): void => {
   exchanges.forEach(exchange => watchExchange(exchange));
   exchanges.forEach(exchange =>
-    setInterval(() => fallbackFetchTickers(exchange), 5000)
+    setInterval(
+      () => fallbackFetchTickers(exchange),
+      fallbackFetchInterval[exchange.name!] || 5000
+    )
   );
-  setInterval(() => staggeredCheckPriceChange(1000), 1000);
-  setInterval(deleteOldPrices, 1000 * 60 * 5);
 };
 
 export const watchExchange = async (
@@ -29,8 +31,12 @@ export const watchExchange = async (
   try {
     const symbols = await getSymbols(exchange);
 
-    for (const symbol of symbols) {
-      watchTicker(exchange, symbol);
+    if (separateWatch[exchange.name!]) {
+      for (const symbol of symbols) {
+        watchTicker(exchange, symbol);
+      }
+    } else {
+      watchTickers(exchange, symbols);
     }
   } catch (error) {
     logger.error(`Error watching exchange ${exchange.name}: ${error}`);
@@ -41,28 +47,31 @@ const watchTicker = async (
   exchange: ExchangeInstance,
   pair: string
 ): Promise<void> => {
-  const name = exchange.name || '';
-  let prev: Ticker | null = null;
-  let buffer: Ticker | null = null;
-
-  setInterval(() => {
-    if (!buffer || !exchangesThrottle[name]) return;
-    if (buffer.timestamp === prev?.timestamp) return;
-    insertPrice(buffer, exchange.name!);
-    prev = buffer;
-    buffer = null;
-  }, exchangesThrottle[name]);
-
   while (true) {
     try {
       const ticker = await exchange.watchTicker(pair);
-      if (exchangesThrottle[name]) {
-        buffer = ticker;
-      } else {
-        insertPrice(ticker, exchange.name!);
-      }
+      insertPrice(ticker, exchange.name!);
     } catch (error) {
-      logger.error(`Error watching ticker for pair ${pair}: ${error}`);
+      logger.error(
+        `${exchange.name}: Error watching ticker for pair ${pair}: ${error}`
+      );
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+};
+
+const watchTickers = async (
+  exchange: ExchangeInstance,
+  pairs: string[]
+): Promise<void> => {
+  while (true) {
+    try {
+      const tickers = await exchange.watchTickers(pairs);
+      insertPrice(Object.values(tickers)[0], exchange.name!);
+    } catch (error) {
+      logger.error(
+        `${exchange.name}: Error watching ticker for pair ${pairs[0]}: ${error}`
+      );
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }

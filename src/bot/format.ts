@@ -72,47 +72,41 @@ export const formatMessage = (
     .map(([exchange, exchangeData]) => {
       if (!exchangeData) return '';
 
-      const { changePercent, prices } = exchangeData;
-      const [prev, last] = prices;
-      const prevPrice = escapeString(prev.price);
-      const lastPrice = escapeString(last.price);
+      const { changePercent, last, lastTime, min, minTime } = exchangeData;
+      const minPrice = escapeString(formatNumber(min));
+      const lastPrice = escapeString(formatNumber(last));
       const priceChange = escapeString(changePercent.toFixed(2));
 
-      const isDelayed =
-        new Date(`${last.timestamp}Z`).getTime() + 16000 <
-        new Date(`${last.created_at}Z`).getTime();
+      const isDelayed = new Date(`${lastTime}Z`).getTime() + 16000 < Date.now();
 
       if (isDelayed && !isAdmin) return '';
 
-      const prevPriceTime = new Date(prev.timestamp).toLocaleTimeString(
-        'de-DE'
-      );
-      const latestPriceTime = new Date(last.timestamp).toLocaleTimeString(
-        'de-DE'
-      );
+      const minPriceTime = new Date(minTime).toLocaleTimeString('de-DE');
+      const latestPriceTime = new Date(lastTime).toLocaleTimeString('de-DE');
       const lightningEmoji = getLightningEmoji(changePercent);
 
       const exchangeLink = getExchangeLink(exchange, res.symbol);
       const exchangeEmoji = getExchangeEmoji(exchange);
 
-      const debugDate = isAdmin
-        ? new Date(last.created_at).toLocaleTimeString('de-DE')
-        : '';
       const delayedMessage = isDelayed ? ` \\(delayed\\)` : '';
       const adminData = isAdmin
-        ? `\\(${debugDate}, ${new Date().toLocaleTimeString('de-DE', {
+        ? `\\(${new Date().toLocaleTimeString('de-DE', {
             timeZone: 'UTC'
           })}\\)`
         : '';
 
       return `
 ${lightningEmoji}
-${prevPriceTime} \\- ${latestPriceTime} ${adminData}${delayedMessage}
+${minPriceTime} \\- ${latestPriceTime} ${adminData}${delayedMessage}
 ${exchangeEmoji} [${exchange}](${exchangeLink}) \\- \`${res.symbol}\`
-Change: ${priceChange}% \\($${prevPrice} \\- $${lastPrice}\\);`;
+Change: ${priceChange}% \\($${minPrice} \\- $${lastPrice}\\);`;
     })
     .filter(Boolean)
     .join('\n');
 
   return exchangeMessages;
+};
+
+const formatNumber = (number: number) => {
+  return Number(number.toFixed(5));
 };

@@ -4,11 +4,26 @@ CREATE TABLE IF NOT EXISTS "exchanges" (
 	CONSTRAINT "exchanges_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "pairs_prices" (
+	"exchange" text NOT NULL,
+	"symbol" text NOT NULL,
+	"price" real NOT NULL,
+	"timestamp" timestamp(2) with time zone NOT NULL,
+	"created_at" timestamp(2) with time zone DEFAULT now()
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_period_changes" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" bigint NOT NULL,
 	"period" integer NOT NULL,
 	"change" real NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "users" (
+	"id" bigint PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"is_admin" boolean DEFAULT false NOT NULL,
+	"is_enabled" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_exchanges" (
@@ -36,10 +51,7 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "idx_pairs_prices_exchange_symbol_timestamp" ON "pairs_prices" USING btree ("exchange","symbol","timestamp" DESC NULLS LAST);--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_user_period_changes" ON "user_period_changes" USING btree ("user_id","period","change");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "pk_user_exchanges" ON "user_exchanges" USING btree ("user_id","exchange_name");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "unique_user_exchange" ON "user_exchanges" USING btree ("user_id","exchange_name");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "idx_pairs_prices_timestamp_symbol_exchange" ON "pairs_prices" USING btree ("timestamp","symbol","exchange");--> statement-breakpoint
-ALTER TABLE "users" DROP COLUMN IF EXISTS "period";--> statement-breakpoint
-ALTER TABLE "users" DROP COLUMN IF EXISTS "change";--> statement-breakpoint
-ALTER TABLE "users" DROP COLUMN IF EXISTS "period_big";--> statement-breakpoint
-ALTER TABLE "users" DROP COLUMN IF EXISTS "change_big";
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_user_exchange" ON "user_exchanges" USING btree ("user_id","exchange_name");

@@ -1,12 +1,19 @@
 import { config } from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
 
-const env =
-  process.env.NODE_ENV === 'production' ? 'production' : 'development';
+const env = process.env.NODE_ENV || 'development';
 
-env === 'production'
-  ? config({ path: '.env.prod' })
-  : config({ path: '.env.development' });
+if (env === 'development') {
+  config({ path: '.env.development' });
+}
+
+if (env === 'production') {
+  config({ path: '.env.prod' });
+}
+
+if (env === 'beta') {
+  config({ path: '.env.prod.beta' });
+}
 
 export default defineConfig({
   dialect: 'postgresql',

@@ -1,5 +1,4 @@
 import { ExchangeInstance } from '../types/types';
-import { OpenInterest } from 'ccxt';
 import { logger } from '@/logger/logger';
 
 export const loadMarkets = async (...exchanges: ExchangeInstance[]) => {

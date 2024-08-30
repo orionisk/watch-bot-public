@@ -9,31 +9,30 @@ import {
   bigint,
   boolean,
   index,
-  uniqueIndex,
-  primaryKey
+  uniqueIndex
 } from 'drizzle-orm/pg-core';
 
 export const pairsPrices = pgTable(
   'pairs_prices',
   {
-    id: serial('id').primaryKey(),
     exchange: text('exchange').notNull(),
     symbol: text('symbol').notNull(),
     price: real('price').notNull(),
     timestamp: timestamp('timestamp', {
       mode: 'string',
-      precision: 2
+      precision: 2,
+      withTimezone: true
     }).notNull(),
     createdAt: timestamp('created_at', {
       mode: 'string',
-      precision: 2
+      precision: 2,
+      withTimezone: true
     }).defaultNow()
   },
   table => ({
-    // pk: primaryKey({ columns: [table.id, table.timestamp] }),
     idxPairsPricesTimestampSymbolExchange: index(
-      'idx_pairs_prices_timestamp_symbol_exchange'
-    ).on(table.timestamp, table.symbol, table.exchange)
+      'idx_pairs_prices_exchange_symbol_timestamp'
+    ).on(table.exchange, table.symbol, table.timestamp.desc())
   })
 );
 

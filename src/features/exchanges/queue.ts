@@ -4,7 +4,7 @@ import { insertPriceSchema } from '@/db/schema/zod';
 import { insertPricesBatch } from '@/db/db';
 
 const priceQueue: z.infer<typeof insertPriceSchema>[] = [];
-const batchSize = 300;
+const batchSize = 5000;
 // const maxQueueSize = 3000;
 
 export const addPriceToQueue = async (

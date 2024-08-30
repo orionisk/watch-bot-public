@@ -7,5 +7,9 @@ if (env === 'development') {
 }
 
 if (process.env.SEED === 'true' && env === 'production') {
-  config({ path: '.env.production' });
+  config({ path: '.env.prod' });
+}
+
+if (process.env.SEED === 'true' && env === 'beta') {
+  config({ path: '.env.prod.beta' });
 }

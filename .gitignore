@@ -7,6 +7,7 @@ pnpm-debug.log
 # Environment variables
 .env.development
 .env.prod
+.env.prod.beta
 
 # Logs
 logs/
@@ -47,3 +48,5 @@ drizzle-dev/
 seed/seed.ts
 seed/seed-dev.ts
 seed/seed-beta.ts
+
+/sql

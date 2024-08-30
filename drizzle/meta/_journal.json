@@ -5,22 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1722050492814,
-      "tag": "0000_fantastic_kree",
+      "when": 1724721143745,
+      "tag": "0000_curved_devos",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1722883285732,
-      "tag": "0001_ordinary_zemo",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1722883674591,
-      "tag": "0002_fair_deathstrike",
+      "when": 1724721188781,
+      "tag": "0001_careless_jack_flag",
       "breakpoints": true
     }
   ]

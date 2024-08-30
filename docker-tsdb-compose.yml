@@ -1,0 +1,29 @@
+services:
+  ts-db:
+    image: timescale/timescaledb-ha:pg16
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "psql -U postgres -d postgres -c 'SELECT 1' || exit 1"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    shm_size: 2g
+    mem_limit: '0'
+    memswap_limit: '0'
+    mem_swappiness: 60
+    mem_reservation: '0'
+    cpus: 0.0
+    cpu_shares: 1024
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - 'ts-data:/home/postgres/pgdata/data'
+volumes:
+  ts-data:
