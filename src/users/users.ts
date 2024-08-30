@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
-import { db } from '@/db/schema/drizzle';
+import { db } from '@/db/drizzle';
 import { usersExchanges, users } from '@/db/schema/schema';
-import { insertUsersSchema } from '@/db/schema/zod';
+import { insertUsersSchema } from '@/db/zod';
 import { logger } from '@/logger/logger';
 import { z } from 'zod';
 import { e, r } from '@/common/utils';

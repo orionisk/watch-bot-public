@@ -3,7 +3,7 @@ import { addPriceToQueue } from './queue';
 import { normalizeSymbol } from '@/common/utils';
 import { Ticker } from 'ccxt';
 import { ParsePriceData } from '@/types/types';
-import { insertPriceSchema } from '@/db/schema/zod';
+import { insertPriceSchema } from '@/db/zod';
 
 export const insertPrice = async (
   data: Ticker,

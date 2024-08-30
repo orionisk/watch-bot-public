@@ -1,6 +1,6 @@
-import { db } from '@/db/schema/drizzle';
+import { db } from '@/db/drizzle';
 import { pairsPrices } from '@/db/schema/schema';
-import { insertPriceSchema } from '@/db/schema/zod';
+import { insertPriceSchema } from '@/db/zod';
 import { z } from 'zod';
 import { logger } from '@/logger/logger';
 import { PriceChangeData } from '@/types/types';

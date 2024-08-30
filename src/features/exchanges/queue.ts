@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { logger } from '@/logger/logger';
-import { insertPriceSchema } from '@/db/schema/zod';
+import { insertPriceSchema } from '@/db/zod';
 import { insertPricesBatch } from '@/db/db';
 
 const priceQueue: z.infer<typeof insertPriceSchema>[] = [];

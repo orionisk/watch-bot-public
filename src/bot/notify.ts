@@ -1,6 +1,6 @@
 import { PriceChangeData } from '@/types/types';
 import { bot } from './bot';
-import { insertUsersSchema } from '@/db/schema/zod';
+import { insertUsersSchema } from '@/db/zod';
 import { z } from 'zod';
 import { logger } from '@/logger/logger';
 import { formatMessage } from './format';

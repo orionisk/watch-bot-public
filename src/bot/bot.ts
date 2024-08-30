@@ -1,4 +1,4 @@
-import { db } from '@/db/schema/drizzle';
+import { db } from '@/db/drizzle';
 import { users } from '@/db/schema/schema';
 import { eq } from 'drizzle-orm';
 import { Bot, InlineKeyboard } from 'grammy';

@@ -2,7 +2,7 @@ import {
   insertUserPeriodChangesSchema,
   insertUsersExchangesSchema,
   insertUsersSchema
-} from '@/db/schema/zod';
+} from '@/db/zod';
 import { pro as ccxt, Exchange as CcxtExchange } from 'ccxt';
 import { z } from 'zod';
 
