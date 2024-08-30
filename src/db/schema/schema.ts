@@ -64,7 +64,7 @@ export const userPeriodChanges = pgTable(
 
 export const exchanges = pgTable('exchanges', {
   id: serial('id').primaryKey(),
-  name: text('name').notNull().unique() // Adding unique constraint here
+  name: text('name').notNull().unique()
 });
 
 export const usersExchanges = pgTable(

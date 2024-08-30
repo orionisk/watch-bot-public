@@ -15,17 +15,13 @@ import { z } from 'zod';
 
 const env = process.env.NODE_ENV || 'development';
 
-if (env === 'development') {
-  config({ path: '.env.development' });
-}
+const configMap = {
+  development: '.env.development',
+  production: '.env.prod',
+  beta: '.env.prod.beta'
+};
 
-if (env === 'production') {
-  config({ path: '.env.prod' });
-}
-
-if (env === 'beta') {
-  config({ path: '.env.prod.beta' });
-}
+config({ path: configMap[env] });
 
 if (!('DATABASE_URL' in process.env))
   throw new Error('DATABASE_URL not found on');

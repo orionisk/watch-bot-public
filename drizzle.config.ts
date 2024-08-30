@@ -3,17 +3,13 @@ import { defineConfig } from 'drizzle-kit';
 
 const env = process.env.NODE_ENV || 'development';
 
-if (env === 'development') {
-  config({ path: '.env.development' });
-}
+const configMap = {
+  development: '.env.development',
+  production: '.env.prod',
+  beta: '.env.prod.beta'
+};
 
-if (env === 'production') {
-  config({ path: '.env.prod' });
-}
-
-if (env === 'beta') {
-  config({ path: '.env.prod.beta' });
-}
+config({ path: configMap[env] });
 
 export default defineConfig({
   dialect: 'postgresql',

@@ -6,17 +6,13 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 const env = process.env.NODE_ENV || 'development';
 
-if (env === 'development') {
-  config({ path: '.env.development' });
-}
+const configMap = {
+  development: '.env.development',
+  production: '.env.prod',
+  beta: '.env.prod.beta'
+};
 
-if (env === 'production') {
-  config({ path: '.env.prod' });
-}
-
-if (env === 'beta') {
-  config({ path: '.env.prod.beta' });
-}
+config({ path: configMap[env] });
 
 const sql = postgres(process.env.DATABASE_URL);
 const db = drizzle(sql);
