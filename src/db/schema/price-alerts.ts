@@ -17,13 +17,13 @@ export const priceAlerts = pgTable('price_alerts', {
   symbol: text('symbol').notNull(),
   exchange: text('exchange').notNull(),
   prev: real('prev').notNull(),
-  prevTs: timestamp('prev_ts', {
+  prevTime: timestamp('prev_ts', {
     mode: 'string',
     precision: 2,
     withTimezone: true
   }).notNull(),
   last: real('last').notNull(),
-  lastTs: timestamp('last_ts', {
+  lastTime: timestamp('last_ts', {
     mode: 'string',
     precision: 2,
     withTimezone: true
