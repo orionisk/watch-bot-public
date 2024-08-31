@@ -4,7 +4,7 @@ import {
   userPeriodChanges,
   users,
   usersExchanges
-} from './schema/schema';
+} from './schema/index';
 
 export const insertPriceSchema = createInsertSchema(pairsPrices);
 export const insertUsersSchema = createInsertSchema(users);

@@ -3,7 +3,7 @@ import postgres from 'postgres';
 
 import '@/config/env';
 
-import * as schema from './schema/schema';
+import * as schema from './schema/index';
 
 export const sql = postgres(process.env.DATABASE_URL!);
 export const db = drizzle(sql, { schema });

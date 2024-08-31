@@ -6,7 +6,7 @@ import {
   exchanges,
   userPeriodChanges,
   usersExchanges
-} from '../src/db/schema/schema';
+} from '../src/db/schema/index';
 import { config } from 'dotenv';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';

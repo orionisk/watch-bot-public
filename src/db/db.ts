@@ -1,5 +1,5 @@
 import { db } from '@/db/drizzle';
-import { pairsPrices } from '@/db/schema/schema';
+import { pairsPrices } from '@/db/schema/index';
 import { insertPriceSchema } from '@/db/zod';
 import { z } from 'zod';
 import { logger } from '@/logger/logger';

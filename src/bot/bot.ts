@@ -1,5 +1,5 @@
 import { db } from '@/db/drizzle';
-import { users } from '@/db/schema/schema';
+import { users } from '@/db/schema/index';
 import { eq } from 'drizzle-orm';
 import { Bot, InlineKeyboard } from 'grammy';
 import { logger } from '@/logger/logger';
