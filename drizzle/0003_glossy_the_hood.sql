@@ -1,0 +1,1 @@
+ALTER TABLE "price_alerts" DROP COLUMN IF EXISTS "change";

@@ -29,7 +29,6 @@ export const priceAlerts = pgTable('price_alerts', {
     withTimezone: true
   }).notNull(),
   period: real('period').notNull(),
-  change: real('change').notNull(),
   changePercent: real('change_percent').notNull(),
   notificationSent: boolean('notification_sent').notNull().default(false)
 });
