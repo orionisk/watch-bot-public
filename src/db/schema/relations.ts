@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
 import { users, userPeriodChanges } from './users';
 import { exchanges, usersExchanges } from './exchanges';
+import { priceAlerts } from './price-alerts';
 
 export const usersRelations = relations(users, ({ many }) => ({
   userExchanges: many(usersExchanges),
@@ -28,3 +29,10 @@ export const userPeriodChangesRelations = relations(
     })
   })
 );
+
+export const userPriceAlertsRelations = relations(priceAlerts, ({ one }) => ({
+  user: one(users, {
+    fields: [priceAlerts.userId],
+    references: [users.id]
+  })
+}));

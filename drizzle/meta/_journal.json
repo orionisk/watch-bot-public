@@ -15,6 +15,13 @@
       "when": 1724721188781,
       "tag": "0001_careless_jack_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1725065473854,
+      "tag": "0002_smart_madelyne_pryor",
+      "breakpoints": true
     }
   ]
 }
