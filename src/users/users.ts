@@ -1,10 +1,23 @@
-import { eq } from 'drizzle-orm';
+import { eq, name } from 'drizzle-orm';
 import { db } from '@/db/drizzle';
-import { usersExchanges, users } from '@/db/schema/index';
-import { insertUsersSchema } from '@/db/zod';
+import {
+  usersExchanges,
+  users,
+  exchanges,
+  userPeriodChanges
+} from '@/db/schema/index';
+import {
+  insertUserPeriodChangesSchema,
+  insertUsersExchangesSchema,
+  insertUsersSchema
+} from '@/db/zod';
 import { logger } from '@/logger/logger';
 import { z } from 'zod';
 import { e, r } from '@/common/utils';
+import {
+  generateUsersExchangeData,
+  generateUsersPeriodChangesData
+} from './user-seed';
 
 export const addUser = async (newUser: z.infer<typeof insertUsersSchema>) => {
   // set default values for period and change
@@ -26,17 +39,31 @@ export const addUser = async (newUser: z.infer<typeof insertUsersSchema>) => {
     const user = await db.transaction(async trx => {
       const [user] = await trx.insert(users).values(parse.data).returning();
 
-      const defaultExchanges = ['Binance', 'Bybit'];
-      const userExchangeValues = defaultExchanges.map(exchange => ({
-        userId: newUser.id,
-        exchangeName: exchange,
-        enabled: true,
-        userName: newUser.name
-      }));
+      if (!user) {
+        logger.error('User insertion failed due to conflict or other issue.');
+        throw new Error('User insertion failed');
+      }
 
-      await trx.insert(usersExchanges).values(userExchangeValues);
+      const exchangesData = await trx
+        .select({ name: exchanges.name })
+        .from(exchanges);
+
+      const usersExchangeData = generateUsersExchangeData(
+        [user],
+        exchangesData,
+        insertUsersExchangesSchema
+      );
+
+      const usersPeriodChangesData = generateUsersPeriodChangesData(
+        [user],
+        insertUserPeriodChangesSchema
+      );
+
+      await trx.insert(usersExchanges).values(usersExchangeData);
+      await trx.insert(userPeriodChanges).values(usersPeriodChangesData);
       return user;
     });
+
     return r(user);
   } catch (error: any) {
     logger.error({ code: error.code, detail: error.detail });
