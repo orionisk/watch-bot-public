@@ -50,3 +50,4 @@ seed/seed-dev.ts
 seed/seed-beta.ts
 
 /sql
+.cursorignore
