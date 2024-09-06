@@ -3,22 +3,8 @@ import { getUsers } from '@/users/users';
 import { UserGroup, UserWithExchanges } from '@/types/types';
 import { processUserGroup } from './process-user';
 
-const checkPriceChange = async (): Promise<UserGroup[]> => {
-  try {
-    const [users, error] = await getUsers();
-
-    if (!users) return [];
-    if (error) logger.error('Error getting users:', error);
-
-    return groupUsersByPeriodAndChange(users);
-  } catch (error) {
-    logger.error(`Error checking price change: ${error}`);
-    return [];
-  }
-};
-
 export const staggeredCheckPriceChange = async (ms: number): Promise<void> => {
-  const userGroups = await checkPriceChange();
+  const userGroups = await getUserGroups();
   const interval = ms / userGroups.length;
 
   userGroups.forEach((group, index) => {
@@ -30,18 +16,30 @@ export const staggeredCheckPriceChange = async (ms: number): Promise<void> => {
   });
 };
 
-const groupUsersByPeriodAndChange = (
-  users: UserWithExchanges[]
-): UserGroup[] => {
+const getUserGroups = async (): Promise<UserGroup[]> => {
+  try {
+    const [users, error] = await getUsers();
+
+    if (!users) return [];
+    if (error) logger.error('Error getting users:', error);
+
+    return groupUsersByPeriod(users);
+  } catch (error) {
+    logger.error(`Error getting users: ${error}`);
+    return [];
+  }
+};
+
+const groupUsersByPeriod = (users: UserWithExchanges[]): UserGroup[] => {
   const userGroups: Record<string, UserGroup> = {};
 
   for (const user of users) {
+    if (!user.isEnabled) continue;
     for (const periodChange of user.userPeriodChanges) {
-      const key = `${periodChange.period}_${periodChange.change}`;
+      const key = `${periodChange.period}`;
       if (!userGroups[key]) {
         userGroups[key] = {
           period: periodChange.period,
-          change: periodChange.change,
           users: []
         };
       }
