@@ -1,107 +1,124 @@
 import { sendPriceChangeNotification } from '@/bot/notify';
-import { executePriceChangeQuery } from '@/db/db';
-import { priceChangeQuery } from '@/db/queries/getPricesChangeQuery';
+import { db } from '@/db/drizzle';
 import {
   Cooldowns,
   PriceChangeData,
+  PriceChangeDataDual,
   UserGroup,
   UserWithExchanges
 } from '@/types/types';
+import { sql } from 'drizzle-orm';
 
 const cds: Cooldowns = {};
 
 export const processUserGroup = async (group: UserGroup) => {
-  const { period, change, users } = group;
+  const { period, users } = group;
   if (!users.length) return;
 
-  const periodMs = (period + 2) * 1000;
-  const now = Date.now();
-  const timestamp = new Date(now - periodMs);
+  const isExists = (await db.execute(sql`SELECT ps_mv_exists(${period});`))[0]
+    ?.ps_mv_exists;
 
-  const data = await executePriceChangeQuery(
-    priceChangeQuery(timestamp.toISOString(), change)
-  );
-
-  if (!data.length) return;
+  if (!isExists) await db.execute(sql`SELECT create_ps_mv(${period});`);
+  else await db.execute(sql`SELECT refresh_ps_mv(${period});`);
 
   for (const user of users) {
-    const filteredData = filterCooldowns(
-      data,
-      user.id,
-      periodMs + 1000,
-      change
+    processUser(user, period);
+  }
+};
+
+const processUser = async (user: UserWithExchanges, period: number) => {
+  const exchanges = user.userExchanges
+    .map(exchange => `'${exchange.exchangeName}'`)
+    .join(', ');
+
+  const userPeriods = user.userPeriodChanges.filter(
+    periodChange => periodChange.period === period
+  );
+
+  for (const { change } of userPeriods) {
+    const data: PriceChangeDataDual[] = await db.execute(
+      sql`
+        SELECT 
+          symbol,
+          jsonb_object_agg(
+              exchange, jsonb_build_object(
+                'last', last,
+                'lastTime', last_ts,
+                'min', lp,
+                'minTime', lp_ts,
+                'max', hp_p,
+                'maxTime', hp_ts,
+                'lowToHigh', l_h,
+                'highToLow', h_l
+              )
+          ) AS data
+          FROM get_ps_from_mv(${period})
+          WHERE exchange IN (${sql.raw(exchanges)})
+            AND l_h > ${change}
+          GROUP BY symbol
+          ORDER BY symbol;
+      `
     );
 
-    if (!filteredData.length) continue;
+    if (!data.length) return;
+
+    const filteredData = filterCooldowns(data, user.id, period, change);
+
+    if (!filteredData.length) return;
 
     sendPriceChangeNotification(user, filteredData);
-    addCooldown(user.id, filteredData, periodMs + 1000, change);
+    addCooldown(user.id, filteredData, period, change);
   }
 };
 
 const filterCooldowns = (
-  data: PriceChangeData[],
+  data: PriceChangeDataDual[],
   userId: number,
   period: number,
   change: number
-): PriceChangeData[] => {
+): PriceChangeDataDual[] => {
   const now = Date.now();
-  const periodChange = `${period}_${change}`;
 
-  return data.reduce(
-    (filteredData: PriceChangeData[], { symbol, data: exchangeData }) => {
-      const filteredExchangeData: { [key: string]: any } = {};
-      let hasValidExchange = false;
-
-      Object.entries(exchangeData).forEach(([exchangeName, exchangeInfo]) => {
+  return data.filter(({ symbol, data: exchangeData }) => {
+    const filteredExchanges = Object.entries(exchangeData).filter(
+      ([exchangeName, _]) => {
         const cooldownEntry =
-          cds[userId]?.[periodChange]?.[symbol]?.[exchangeName];
-        if (!cooldownEntry || cooldownEntry.cdEndTimestamp <= now) {
-          filteredExchangeData[exchangeName] = exchangeInfo;
-          hasValidExchange = true;
-        }
-      });
-
-      if (hasValidExchange) {
-        filteredData.push({ symbol, data: filteredExchangeData });
+          cds[userId]?.[period]?.[change]?.[symbol]?.[exchangeName];
+        return !cooldownEntry || cooldownEntry.cdEndTimestamp <= now;
       }
+    );
 
-      return filteredData;
-    },
-    []
-  );
+    if (filteredExchanges.length > 0) {
+      exchangeData = Object.fromEntries(filteredExchanges);
+      return true;
+    }
+    return false;
+  });
 };
 
 const addCooldown = (
   userId: number,
-  data: PriceChangeData[],
+  data: PriceChangeDataDual[],
   period: number,
   change: number
 ) => {
   const now = Date.now();
+  const periodMs = period * 60 * 1000;
 
   for (const { symbol, data: exchangeData } of data) {
-    if (!cds[userId]) {
-      cds[userId] = {};
-    }
-
-    const periodChange = `${period}_${change}`;
-
-    if (!cds[userId][periodChange]) {
-      cds[userId][periodChange] = {};
-    }
+    cds[userId] ??= {};
+    cds[userId][period] ??= {};
+    cds[userId][period][change] ??= {};
+    cds[userId][period][change][symbol] ??= {};
 
     for (const exchangeName of Object.keys(exchangeData)) {
       const lastPriceTimestamp = new Date(
         exchangeData[exchangeName]?.lastTime
       ).getTime();
-      const cdEndTimestamp = Math.max(now, lastPriceTimestamp + period);
 
-      if (!cds[userId][periodChange][symbol]) {
-        cds[userId][periodChange][symbol] = {};
-      }
+      const cdEndTimestamp = Math.max(now, lastPriceTimestamp + periodMs);
 
-      cds[userId][periodChange][symbol][exchangeName] = {
+      cds[userId][period][change][symbol][exchangeName] = {
         cdEndTimestamp
       };
     }

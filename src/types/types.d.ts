@@ -34,11 +34,26 @@ export type PriceChangeData = {
   data: Record<string, ExchangeData>;
 };
 
+type ExchangeDataDual = {
+  last: number;
+  lastTime: string;
+  min: number;
+  minTime: string;
+  max: number;
+  maxTime: string;
+  lowToHigh: number;
+  highToLow: number;
+};
+
+export type PriceChangeDataDual = {
+  symbol: string;
+  data: Record<string, ExchangeDataDual>;
+};
+
 export type User = z.infer<typeof insertUsersSchema>;
 
 interface UserGroup {
   period: number;
-  change: number;
   users: UserWithExchanges[];
 }
 
@@ -49,10 +64,12 @@ export type UserWithExchanges = User & {
 
 export type Cooldowns = {
   [id: number]: {
-    [periodChange: string]: {
-      [symbol: string]: {
-        [exchangeName: string]: {
-          cdEndTimestamp: number;
+    [period: string]: {
+      [change: number]: {
+        [symbol: string]: {
+          [exchangeName: string]: {
+            cdEndTimestamp: number;
+          };
         };
       };
     };
