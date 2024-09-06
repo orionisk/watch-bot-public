@@ -1,4 +1,4 @@
-import { PriceChangeData } from '@/types/types';
+import { PriceChangeData, PriceChangeDataDual } from '@/types/types';
 
 const exchangeMap: Record<
   string,
@@ -65,14 +65,21 @@ const escapeString = (str: number | string): string =>
   str.toString().replace(/[.-]/g, '\\$&');
 
 export const formatMessage = (
-  res: PriceChangeData,
+  res: PriceChangeDataDual,
   isAdmin = false
 ): string => {
   const exchangeMessages = Object.entries(res.data)
     .map(([exchange, exchangeData]) => {
       if (!exchangeData) return '';
 
-      const { changePercent, last, lastTime, min, minTime } = exchangeData;
+      const {
+        lowToHigh: changePercent,
+        last,
+        lastTime,
+        min,
+        minTime
+      } = exchangeData;
+
       const minPrice = escapeString(formatNumber(min));
       const lastPrice = escapeString(formatNumber(last));
       const priceChange = escapeString(changePercent.toFixed(2));

@@ -1,4 +1,4 @@
-import { PriceChangeData } from '@/types/types';
+import { PriceChangeData, PriceChangeDataDual } from '@/types/types';
 import { bot } from './bot';
 import { insertUsersSchema } from '@/db/zod';
 import { z } from 'zod';
@@ -44,10 +44,13 @@ const sendMessage = async (id: number, message: string): Promise<void> => {
 
 export const sendPriceChangeNotification = async (
   user: z.infer<typeof insertUsersSchema>,
-  data: PriceChangeData[]
+  data: PriceChangeDataDual[]
 ): Promise<void> => {
   const { isAdmin, id } = user;
-  const chunks: PriceChangeData[][] = chunkArray(data, MAX_PAIRS_PER_MESSAGE);
+  const chunks: PriceChangeDataDual[][] = chunkArray(
+    data,
+    MAX_PAIRS_PER_MESSAGE
+  );
 
   for (const chunk of chunks) {
     const message = chunk
