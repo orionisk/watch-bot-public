@@ -8,6 +8,7 @@ import {
   UserWithExchanges
 } from '@/types/types';
 import { sql } from 'drizzle-orm';
+import { addCooldown, filterCooldowns } from './cooldown';
 
 const cds: Cooldowns = {};
 
@@ -34,73 +35,27 @@ const processUser = async (user: UserWithExchanges, period: number) => {
   const userPeriods = user.userPeriodChanges.filter(
     periodChange => periodChange.period === period
   );
-
   for (const { change } of userPeriods) {
-    const data: PriceChangeDataDual[] = await db.execute(
-      priceChangeDualQuery(exchanges, period, change)
-    );
-
-    if (!data.length) return;
-
-    const filteredData = filterCooldowns(data, user.id, period, change);
-
-    if (!filteredData.length) return;
-
-    sendPriceChangeNotification(user, filteredData);
-    addCooldown(user.id, filteredData, period, change);
+    processUserPeriodChange(user, exchanges, period, change);
   }
 };
 
-const filterCooldowns = (
-  data: PriceChangeDataDual[],
-  userId: number,
-  period: number,
-  change: number
-): PriceChangeDataDual[] => {
-  const now = Date.now();
-
-  return data.filter(({ symbol, data: exchangeData }) => {
-    const filteredExchanges = Object.entries(exchangeData).filter(
-      ([exchangeName, _]) => {
-        const cooldownEntry =
-          cds[userId]?.[period]?.[change]?.[symbol]?.[exchangeName];
-        return !cooldownEntry || cooldownEntry.cdEndTimestamp <= now;
-      }
-    );
-
-    if (filteredExchanges.length > 0) {
-      exchangeData = Object.fromEntries(filteredExchanges);
-      return true;
-    }
-    return false;
-  });
-};
-
-const addCooldown = (
-  userId: number,
-  data: PriceChangeDataDual[],
+const processUserPeriodChange = async (
+  user: UserWithExchanges,
+  exchanges: string,
   period: number,
   change: number
 ) => {
-  const now = Date.now();
-  const periodMs = period * 60 * 1000;
+  const data: PriceChangeDataDual[] = await db.execute(
+    priceChangeDualQuery(exchanges, period, change)
+  );
 
-  for (const { symbol, data: exchangeData } of data) {
-    cds[userId] ??= {};
-    cds[userId][period] ??= {};
-    cds[userId][period][change] ??= {};
-    cds[userId][period][change][symbol] ??= {};
+  if (!data.length) return;
 
-    for (const exchangeName of Object.keys(exchangeData)) {
-      const lastPriceTimestamp = new Date(
-        exchangeData[exchangeName]?.lastTime
-      ).getTime();
+  const filteredData = filterCooldowns(cds, data, user.id, period, change);
 
-      const cdEndTimestamp = Math.max(now, lastPriceTimestamp + periodMs);
+  if (!filteredData.length) return;
 
-      cds[userId][period][change][symbol][exchangeName] = {
-        cdEndTimestamp
-      };
-    }
-  }
+  sendPriceChangeNotification(user, filteredData);
+  addCooldown(cds, user.id, filteredData, period, change);
 };
