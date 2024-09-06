@@ -1,8 +1,8 @@
 import { sendPriceChangeNotification } from '@/bot/notify';
 import { db } from '@/db/drizzle';
+import { priceChangeDualQuery } from '@/db/queries/getPricesChangeDualQuery';
 import {
   Cooldowns,
-  PriceChangeData,
   PriceChangeDataDual,
   UserGroup,
   UserWithExchanges
@@ -37,27 +37,7 @@ const processUser = async (user: UserWithExchanges, period: number) => {
 
   for (const { change } of userPeriods) {
     const data: PriceChangeDataDual[] = await db.execute(
-      sql`
-        SELECT 
-          symbol,
-          jsonb_object_agg(
-              exchange, jsonb_build_object(
-                'last', last,
-                'lastTime', last_ts,
-                'min', lp,
-                'minTime', lp_ts,
-                'max', hp_p,
-                'maxTime', hp_ts,
-                'lowToHigh', l_h,
-                'highToLow', h_l
-              )
-          ) AS data
-          FROM get_ps_from_mv(${period})
-          WHERE exchange IN (${sql.raw(exchanges)})
-            AND l_h > ${change}
-          GROUP BY symbol
-          ORDER BY symbol;
-      `
+      priceChangeDualQuery(exchanges, period, change)
     );
 
     if (!data.length) return;
