@@ -5,9 +5,6 @@ import { processUserGroup } from './process-user';
 
 export const staggeredCheckPriceChange = async (ms: number): Promise<void> => {
   const userGroups = await getUserGroups();
-  // console.log(
-  //   userGroups.map(group => group.users.map(u => u.userPeriodChanges)).flat()
-  // );
   const interval = ms / userGroups.length;
 
   userGroups.forEach((group, index) => {
