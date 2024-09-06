@@ -40,7 +40,7 @@ const getLightningEmoji = (changePercent: number): string => {
   const emojis = ['⚡⚡⚡', '⚡⚡', '⚡'];
 
   for (let i = 0; i < thresholds.length; i++) {
-    if (changePercent >= thresholds[i]) {
+    if (Math.abs(changePercent) >= thresholds[i]) {
       return emojis[i];
     }
   }
@@ -95,12 +95,13 @@ export const formatMessage = (
             timeZone: 'UTC'
           })}\\)`
         : '';
+      const changeEmoji = changePercent >= 0 ? '🔺' : '🔻';
 
       return `
 ${lightningEmoji}
 ${minPriceTime} \\- ${latestPriceTime} ${adminData}${delayedMessage}
 ${exchangeEmoji} [${exchange}](${exchangeLink}) \\- \`${res.symbol}\`
-Change: ${priceChange}% \\($${minPrice} \\- $${lastPrice}\\);`;
+${changeEmoji} ${priceChange}% \\($${minPrice} \\- $${lastPrice}\\);`;
     })
     .filter(Boolean)
     .join('\n');
