@@ -5,6 +5,9 @@ import { processUserGroup } from './process-user';
 
 export const staggeredCheckPriceChange = async (ms: number): Promise<void> => {
   const userGroups = await getUserGroups();
+  // console.log(
+  //   userGroups.map(group => group.users.map(u => u.userPeriodChanges)).flat()
+  // );
   const interval = ms / userGroups.length;
 
   userGroups.forEach((group, index) => {
@@ -21,6 +24,7 @@ const getUserGroups = async (): Promise<UserGroup[]> => {
     const [users, error] = await getUsers();
 
     if (!users) return [];
+
     if (error) logger.error('Error getting users:', error);
 
     return groupUsersByPeriod(users);
@@ -35,13 +39,15 @@ const groupUsersByPeriod = (users: UserWithExchanges[]): UserGroup[] => {
 
   for (const user of users) {
     if (!user.isEnabled) continue;
-    for (const periodChange of user.userPeriodChanges) {
-      const key = `${periodChange.period}`;
+
+    const uniquePeriods = new Set(
+      user.userPeriodChanges.map(change => change.period)
+    );
+
+    for (const period of uniquePeriods) {
+      const key = `${period}`;
       if (!userGroups[key]) {
-        userGroups[key] = {
-          period: periodChange.period,
-          users: []
-        };
+        userGroups[key] = { period, users: [] };
       }
       userGroups[key].users.push(user);
     }
