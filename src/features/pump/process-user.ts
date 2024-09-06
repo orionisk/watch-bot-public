@@ -18,14 +18,8 @@ export const processUserGroup = async (group: UserGroup) => {
   const now = Date.now();
   const timestamp = new Date(now - periodMs);
 
-  let exchanges = users[0].userExchanges
-    .filter(exchange => exchange.enabled)
-    .map(exchange => exchange.exchangeName);
-
-  if (!exchanges.length) exchanges = ['Bybit'];
-
   const data = await executePriceChangeQuery(
-    priceChangeQuery(timestamp.toISOString(), change, exchanges)
+    priceChangeQuery(timestamp.toISOString(), change)
   );
 
   if (!data.length) return;

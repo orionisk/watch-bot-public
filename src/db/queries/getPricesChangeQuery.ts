@@ -1,13 +1,7 @@
 // new.ts
 import { sql } from 'drizzle-orm';
 
-export const priceChangeQuery = (
-  timestamp: string,
-  change: number,
-  exchanges: string[]
-) => {
-  const exchangeList = exchanges.map(exchange => `'${exchange}'`).join(', ');
-
+export const priceChangeQuery = (timestamp: string, change: number) => {
   return sql`
     WITH filtered_1m_prices AS (
         SELECT
@@ -21,7 +15,6 @@ export const priceChangeQuery = (
             high(candlestick) AS high_price
         FROM mv_candles_1m
         WHERE ts >= ${timestamp}::timestamp
-          AND exchange IN (${sql.raw(exchangeList)})
     ), 
     filtered_1s_prices AS (
         SELECT
@@ -36,7 +29,6 @@ export const priceChangeQuery = (
         FROM mv_candles_1s
         WHERE ts >= date_trunc('minute', ${timestamp}::timestamp) + extract(second from ${timestamp}::timestamp) * interval '1 second'
         AND ts < date_trunc('minute', ${timestamp}::timestamp) + interval '1 minute'
-        AND exchange IN (${sql.raw(exchangeList)})
     ),
     filtered_prices AS (
         SELECT * FROM filtered_1m_prices

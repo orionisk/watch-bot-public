@@ -3,7 +3,7 @@ import { getUsers } from '@/users/users';
 import { UserGroup, UserWithExchanges } from '@/types/types';
 import { processUserGroup } from './process-user';
 
-export const checkPriceChange = async (): Promise<UserGroup[]> => {
+const checkPriceChange = async (): Promise<UserGroup[]> => {
   try {
     const [users, error] = await getUsers();
 
