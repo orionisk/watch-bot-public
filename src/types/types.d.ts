@@ -37,12 +37,9 @@ export type PriceChangeData = {
 type ExchangeDataDual = {
   last: number;
   lastTime: string;
-  min: number;
-  minTime: string;
-  max: number;
-  maxTime: string;
-  lowToHigh: number;
-  highToLow: number;
+  prev: number;
+  prevTime: string;
+  changePercent: number;
 };
 
 export type PriceChangeDataDual = {

@@ -1,4 +1,4 @@
-import { PriceChangeData, PriceChangeDataDual } from '@/types/types';
+import { PriceChangeDataDual } from '@/types/types';
 
 const exchangeMap: Record<
   string,
@@ -72,15 +72,9 @@ export const formatMessage = (
     .map(([exchange, exchangeData]) => {
       if (!exchangeData) return '';
 
-      const {
-        lowToHigh: changePercent,
-        last,
-        lastTime,
-        min,
-        minTime
-      } = exchangeData;
+      const { changePercent, last, lastTime, prev, prevTime } = exchangeData;
 
-      const minPrice = escapeString(formatNumber(min));
+      const minPrice = escapeString(formatNumber(prev));
       const lastPrice = escapeString(formatNumber(last));
       const priceChange = escapeString(changePercent.toFixed(2));
 
@@ -88,7 +82,7 @@ export const formatMessage = (
 
       if (isDelayed && !isAdmin) return '';
 
-      const minPriceTime = new Date(minTime).toLocaleTimeString('de-DE');
+      const minPriceTime = new Date(prevTime).toLocaleTimeString('de-DE');
       const latestPriceTime = new Date(lastTime).toLocaleTimeString('de-DE');
       const lightningEmoji = getLightningEmoji(changePercent);
 
