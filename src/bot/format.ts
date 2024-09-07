@@ -95,7 +95,7 @@ export const formatMessage = (
             timeZone: 'UTC'
           })}\\)`
         : '';
-      const changeEmoji = changePercent >= 0 ? '🔺' : '🔻';
+      const changeEmoji = changePercent >= 0 ? '🔷' : '🔻';
 
       return `
 ${lightningEmoji}
