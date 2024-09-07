@@ -1,7 +1,7 @@
 import {
   insertUserPeriodChangesSchema,
   insertUsersExchangesSchema
-} from '../src/db/schema/zod';
+} from '../src/db/zod';
 import {
   exchanges,
   userPeriodChanges,
