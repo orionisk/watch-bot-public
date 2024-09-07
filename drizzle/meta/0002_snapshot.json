@@ -1,6 +1,6 @@
 {
-  "id": "c0f07b5b-8cea-4d44-b25f-579e4c0cb983",
-  "prevId": "3efb63eb-c6f1-4160-bda2-dd036c1d62b6",
+  "id": "6db87edf-db7c-49b6-977b-a5163c6ff8bd",
+  "prevId": "c2bb7097-54b1-44d6-8ebc-8cea81d6c419",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -64,9 +64,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -126,24 +126,24 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "user_period_changes_user_id_users_id_fk": {
           "name": "user_period_changes_user_id_users_id_fk",
           "tableFrom": "user_period_changes",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -208,10 +208,10 @@
       "uniqueConstraints": {
         "exchanges_name_unique": {
           "name": "exchanges_name_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "name"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       }
     },
@@ -263,9 +263,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "unique_user_exchange": {
           "name": "unique_user_exchange",
@@ -284,37 +284,37 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "user_exchanges_user_id_users_id_fk": {
           "name": "user_exchanges_user_id_users_id_fk",
           "tableFrom": "user_exchanges",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "user_exchanges_exchange_name_exchanges_name_fk": {
           "name": "user_exchanges_exchange_name_exchanges_name_fk",
           "tableFrom": "user_exchanges",
-          "tableTo": "exchanges",
           "columnsFrom": [
             "exchange_name"
           ],
+          "tableTo": "exchanges",
           "columnsTo": [
             "name"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -379,12 +379,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "change": {
-          "name": "change",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
         "change_percent": {
           "name": "change_percent",
           "type": "real",
@@ -404,15 +398,15 @@
         "price_alerts_user_id_users_id_fk": {
           "name": "price_alerts_user_id_users_id_fk",
           "tableFrom": "price_alerts",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},

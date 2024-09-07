@@ -1,9 +1,3 @@
-CREATE TABLE IF NOT EXISTS "exchanges" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	CONSTRAINT "exchanges_name_unique" UNIQUE("name")
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "pairs_prices" (
 	"exchange" text NOT NULL,
 	"symbol" text NOT NULL,
@@ -26,11 +20,31 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"is_enabled" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "exchanges" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	CONSTRAINT "exchanges_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_exchanges" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" bigint NOT NULL,
 	"exchange_name" text NOT NULL,
 	"enabled" boolean DEFAULT true NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "price_alerts" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" bigint NOT NULL,
+	"symbol" text NOT NULL,
+	"exchange" text NOT NULL,
+	"prev" real NOT NULL,
+	"prev_ts" timestamp(2) with time zone NOT NULL,
+	"last" real NOT NULL,
+	"last_ts" timestamp(2) with time zone NOT NULL,
+	"period" real NOT NULL,
+	"change_percent" real NOT NULL,
+	"notification_sent" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -47,6 +61,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "user_exchanges" ADD CONSTRAINT "user_exchanges_exchange_name_exchanges_name_fk" FOREIGN KEY ("exchange_name") REFERENCES "public"."exchanges"("name") ON DELETE cascade ON UPDATE cascade;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "price_alerts" ADD CONSTRAINT "price_alerts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
