@@ -9,21 +9,28 @@ export const filterCooldowns = (
 ): PriceChangeDataDual[] => {
   const now = Date.now();
 
-  return data.filter(({ symbol, data: exchangeData }) => {
-    const filteredExchanges = Object.entries(exchangeData).filter(
-      ([exchangeName, _]) => {
+  return data.reduce(
+    (filteredData: PriceChangeDataDual[], { symbol, data: exchangeData }) => {
+      const filteredExchangeData: { [key: string]: any } = {};
+      let hasValidExchange = false;
+
+      Object.entries(exchangeData).forEach(([exchangeName, exchangeInfo]) => {
         const cooldownEntry =
           cds[userId]?.[period]?.[change]?.[symbol]?.[exchangeName];
-        return !cooldownEntry || cooldownEntry.cdEndTimestamp <= now;
-      }
-    );
+        if (!cooldownEntry || cooldownEntry.cdEndTimestamp <= now) {
+          filteredExchangeData[exchangeName] = exchangeInfo;
+          hasValidExchange = true;
+        }
+      });
 
-    if (filteredExchanges.length > 0) {
-      exchangeData = Object.fromEntries(filteredExchanges);
-      return true;
-    }
-    return false;
-  });
+      if (hasValidExchange) {
+        filteredData.push({ symbol, data: filteredExchangeData });
+      }
+
+      return filteredData;
+    },
+    []
+  );
 };
 
 export const addCooldown = (
