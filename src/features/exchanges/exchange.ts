@@ -81,6 +81,9 @@ const fallbackFetchTickers = async (exchange: ExchangeInstance) => {
   try {
     const symbols = await getSymbols(exchange);
     const data = await exchange.fetchTickers(symbols);
+
+    if (!data) return;
+
     for (const d of Object.values(data)) {
       insertPrice(d, exchange.name!);
     }
