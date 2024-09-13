@@ -17,7 +17,20 @@ export const filterCooldowns = (
       Object.entries(exchangeData).forEach(([exchangeName, exchangeInfo]) => {
         const cooldownEntry =
           cds[userId]?.[period]?.[change]?.[symbol]?.[exchangeName];
-        if (!cooldownEntry || cooldownEntry.cdEndTimestamp <= now) {
+
+        const isExpired = cooldownEntry?.cdEndTimestamp <= now;
+
+        const last = exchangeInfo.last;
+
+        const priceChangePercent =
+          ((last - cooldownEntry?.last) / cooldownEntry?.last) * 100;
+
+        const hasSignificantPriceChange =
+          ((change > 0 && priceChangePercent > 0) ||
+            (change < 0 && priceChangePercent < 0)) &&
+          Math.abs(priceChangePercent) >= Math.abs(change);
+
+        if (!cooldownEntry || isExpired || hasSignificantPriceChange) {
           filteredExchangeData[exchangeName] = exchangeInfo;
           hasValidExchange = true;
         }
@@ -53,11 +66,15 @@ export const addCooldown = (
       const lastPriceTimestamp = new Date(
         exchangeData[exchangeName]?.lastTime
       ).getTime();
+      const prev = exchangeData[exchangeName].prev;
+      const last = exchangeData[exchangeName].last;
 
       const cdEndTimestamp = Math.max(now, lastPriceTimestamp + periodMs);
 
       cds[userId][period][change][symbol][exchangeName] = {
-        cdEndTimestamp
+        cdEndTimestamp,
+        prev,
+        last
       };
     }
   }

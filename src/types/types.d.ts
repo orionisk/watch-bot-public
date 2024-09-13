@@ -66,6 +66,8 @@ export type Cooldowns = {
         [symbol: string]: {
           [exchangeName: string]: {
             cdEndTimestamp: number;
+            last: number;
+            prev;
           };
         };
       };
