@@ -18,7 +18,6 @@ export const sendWebhookNotification = async (
 
     while (attempts < MAX_RETRIES && !success) {
       try {
-        logger.info(`Sending webhook to ${webhookUrl} with payload: ${JSON.stringify(payload)}`);
         const res = await fetch(webhookUrl, {
           method: 'POST',
           headers: {
@@ -26,7 +25,6 @@ export const sendWebhookNotification = async (
           },
           body: JSON.stringify(payload)
         });
-        console.log(res.ok);
         if (res.ok) success = true;
         attempts++;
       } catch (error) {
