@@ -1,12 +1,5 @@
-import {
-  insertUserPeriodChangesSchema,
-  insertUsersExchangesSchema
-} from '../src/db/zod';
-import {
-  exchanges,
-  userPeriodChanges,
-  usersExchanges
-} from '../src/db/schema/index';
+import { insertUserPeriodChangesSchema, insertUsersExchangesSchema } from '../src/db/zod';
+import { exchanges, userPeriodChanges, usersExchanges } from '../src/db/schema/index';
 import { config } from 'dotenv';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
@@ -23,17 +16,14 @@ const configMap = {
 
 config({ path: configMap[env] });
 
-if (!('DATABASE_URL' in process.env))
-  throw new Error('DATABASE_URL not found on');
+if (!('DATABASE_URL' in process.env)) throw new Error('DATABASE_URL not found on');
 
 const generateUsersExchangeData = (
   usersData: Array<{ id: string }>,
   exchangesData: Array<{ name: string }>,
   insertUsersExchangesSchema: z.ZodSchema<any>
 ): z.infer<typeof insertUsersExchangesSchema>[] =>
-  usersData
-    .map(u => exchangesData.map(e => ({ userId: u.id, exchangeName: e.name })))
-    .flat();
+  usersData.map(u => exchangesData.map(e => ({ userId: u.id, exchangeName: e.name }))).flat();
 
 const generateUsersPeriodChangesData = (
   usersData: Array<{ id: string }>,
@@ -41,8 +31,9 @@ const generateUsersPeriodChangesData = (
 ): z.infer<typeof insertUserPeriodChangesSchema>[] =>
   usersData
     .map(u => [
-      { userId: u.id, change: 2, period: 2 },
-      { userId: u.id, change: 10, period: 20 }
+      // { userId: u.id, change: 2, period: 2 },
+      { userId: u.id, change: 10, period: 20 },
+      { userId: u.id, change: -10, period: 20 }
     ])
     .flat();
 
@@ -71,16 +62,10 @@ export const seed = async (usersData, exchangesData) => {
   );
 
   // insert user exchanges
-  await db
-    .insert(usersExchanges)
-    .values(usersExchangeData)
-    .onConflictDoNothing();
+  await db.insert(usersExchanges).values(usersExchangeData).onConflictDoNothing();
 
   // insert user periods
-  await db
-    .insert(userPeriodChanges)
-    .values(usersPeriodChangesData)
-    .onConflictDoNothing();
+  await db.insert(userPeriodChanges).values(usersPeriodChangesData).onConflictDoNothing();
 
   console.log('Seed done');
   return sql.end();
