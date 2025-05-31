@@ -4,10 +4,8 @@ import { insertUsersSchema } from '@/db/zod';
 import { z } from 'zod';
 import { logger } from '@/logger/logger';
 import { formatMessage } from './format';
-
-const MAX_RETRIES = 3; // Maximum number of retry attempts
-const RETRY_DELAY = 2000; // Delay between retries in milliseconds
-const MAX_PAIRS_PER_MESSAGE = 15; // Maximum number of pairs per message
+import { MAX_PAIRS_PER_MESSAGE, MAX_RETRIES, RETRY_DELAY } from './const';
+import { sendWebhookNotification } from './webhook';
 
 const chunkArray = <T>(array: T[], chunkSize: number): T[][] =>
   Array.from({ length: Math.ceil(array.length / chunkSize) }, (_, index) =>
@@ -26,12 +24,10 @@ const sendMessage = async (id: number, message: string): Promise<void> => {
           is_disabled: true
         }
       });
-      success = true; // Message sent successfully
+      success = true;
     } catch (error) {
       attempts++;
-      logger.error(
-        `Error sending message (attempt ${attempts}): ${error}, message: ${message}`
-      );
+      logger.error(`Error sending message (attempt ${attempts}): ${error}, message: ${message}`);
 
       if (attempts < MAX_RETRIES) {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
@@ -46,11 +42,12 @@ export const sendPriceChangeNotification = async (
   user: z.infer<typeof insertUsersSchema>,
   data: PriceChangeDataDual[]
 ): Promise<void> => {
-  const { isAdmin, id } = user;
-  const chunks: PriceChangeDataDual[][] = chunkArray(
-    data,
-    MAX_PAIRS_PER_MESSAGE
-  );
+  const { isAdmin, id, webhookUrl } = user;
+  const chunks: PriceChangeDataDual[][] = chunkArray(data, MAX_PAIRS_PER_MESSAGE);
+
+  if (webhookUrl) {
+    data.forEach(item => sendWebhookNotification(webhookUrl, item));
+  }
 
   for (const chunk of chunks) {
     const message = chunk

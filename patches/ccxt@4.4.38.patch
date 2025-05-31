@@ -1,0 +1,22 @@
+diff --git a/js/src/bybit.js b/js/src/bybit.js
+index af9a541a1c39064c9ed460c2ae19b5523af5f6a1..6195a120aea4015ecd98bfb74c6c00488cf650ad 100644
+--- a/js/src/bybit.js
++++ b/js/src/bybit.js
+@@ -2341,6 +2341,7 @@ export default class bybit extends Exchange {
+         const result = this.safeDict(response, 'result', {});
+         const tickers = this.safeList(result, 'list', []);
+         const rawTicker = this.safeDict(tickers, 0);
++        rawTicker.time = response.time;
+         return this.parseTicker(rawTicker, market);
+     }
+     /**
+@@ -2447,6 +2448,9 @@ export default class bybit extends Exchange {
+         //         "time": 1672376496682
+         //     }
+         //
++        for (const r of Object.values(response.result.list)) {
++          r.time = response.time;
++        }
+         const result = this.safeDict(response, 'result', {});
+         const tickerList = this.safeList(result, 'list', []);
+         return this.parseTickers(tickerList, parsedSymbols);

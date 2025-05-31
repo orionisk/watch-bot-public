@@ -16,7 +16,8 @@ export const generateUsersPeriodChangesData = (
 ): z.infer<typeof insertUserPeriodChangesSchema>[] =>
   usersData
     .map(u => [
-      { userId: u.id, change: 2, period: 2 },
-      { userId: u.id, change: 10, period: 20 }
+      // { userId: u.id, change: 2, period: 2 },
+      { userId: u.id, change: 10, period: 20 },
+      { userId: u.id, change: -10, period: 20 }
     ])
     .flat();

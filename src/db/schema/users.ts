@@ -13,7 +13,8 @@ export const users = pgTable('users', {
   id: bigint('id', { mode: 'number' }).primaryKey(),
   name: text('name').notNull(),
   isAdmin: boolean('is_admin').notNull().default(false),
-  isEnabled: boolean('is_enabled').notNull().default(true)
+  isEnabled: boolean('is_enabled').notNull().default(true),
+  webhookUrl: text('webhook_url')
 });
 
 export const userPeriodChanges = pgTable(
