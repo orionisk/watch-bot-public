@@ -2,6 +2,8 @@ import { logger } from '@/logger/logger';
 import { PriceChangeDataDual } from '@/types/types';
 import { MAX_RETRIES, RETRY_DELAY } from './const';
 
+console.log('test');
+
 export const sendWebhookNotification = async (
   webhookUrl: string,
   data: PriceChangeDataDual
