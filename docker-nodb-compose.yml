@@ -3,8 +3,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - .env.prod.example
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
     restart: always
     command: >
       sh -c "
